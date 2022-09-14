@@ -190,6 +190,8 @@ uint32_t ACAN_ESP32::begin (const ACAN_ESP32_Settings & inSettings,
   if (!mDriverTransmitBuffer.initWithSize (inSettings.mDriverTransmitBufferSize)) {
     errorCode |= kCannotAllocateDriverTransmitBuffer ;
   }
+
+  mReceiveQueue = inSettings.mReceiveQueue;
 //--------------------------------- Set Bus timing Registers
   if (errorCode == 0) {
     setBitTimingSettings (inSettings) ;
@@ -246,23 +248,33 @@ void ACAN_ESP32::handleTXInterrupt (void) {
 //-------------------------------------------------------------------------------------
 
 void ACAN_ESP32::handleRXInterrupt (void) {
+  BaseType_t xHigherPriorityTaskWoken;
   CANMessage frame;
   getReceivedMessage (frame) ;
   switch (mAcceptedFrameFormat) {
   case ACAN_ESP32_Filter::standard :
     if (!frame.ext) {
-      mDriverReceiveBuffer.append (frame) ;
+      xQueueSendToBackFromISR( mReceiveQueue, &frame, &xHigherPriorityTaskWoken );
+      //mDriverReceiveBuffer.append (frame) ;
     }
     break ;
   case ACAN_ESP32_Filter::extended :
     if (frame.ext) {
-      mDriverReceiveBuffer.append (frame) ;
+      xQueueSendToBackFromISR( mReceiveQueue, &frame, &xHigherPriorityTaskWoken );
+      // mDriverReceiveBuffer.append (frame) ;
     }
     break ;
   case ACAN_ESP32_Filter::standardAndExtended :
-    mDriverReceiveBuffer.append (frame) ;
+    xQueueSendToBackFromISR( mReceiveQueue, &frame, &xHigherPriorityTaskWoken );
+    // mDriverReceiveBuffer.append (frame) ;
     break ;
   }
+
+  // if( xHigherPriorityTaskWoken )
+  //   {
+  //       /* Actual macro used here is port specific. */
+  //       taskYIELD_FROM_ISR ();
+  //   }
 }
 
 //--------------------------------------------------------------------------------------------------

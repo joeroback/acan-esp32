@@ -16,11 +16,14 @@
 //  Include files
 //--------------------------------------------------------------------------------------------------
 
-#include <stdint.h>
+#include <cstdint>
+
+#include <ACAN_ESP32_CANRegisters.h>
 
 //--- Useless include, removed in release 1.0.3
 #ifdef ARDUINO
-//  #include <freertos/FreeRTOS.h>
+//#include <freertos/queue.h>
+//#include <freertos/freertos.h>
 #endif
 
 //--- For getting gpio_num_t type declaration (added in release 1.0.3)
@@ -95,6 +98,8 @@ class ACAN_ESP32_Settings {
     public: static const uint8_t MAX_TIME_SEGMENT_1 = 16 ;
     public: static const uint8_t MAX_TIME_SEGMENT_2 = 8 ;
     public: static const uint8_t MAX_SJW            = 4 ;
+
+    public: QueueHandle_t mReceiveQueue = nullptr;
 
   //································································································
   //   Requested mode

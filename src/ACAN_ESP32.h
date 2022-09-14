@@ -98,6 +98,8 @@ class ACAN_ESP32 {
 
   public: inline void resetDriverTransmitBufferPeakCount (void) { mDriverTransmitBuffer.resetPeakCount () ; }
 
+  private: QueueHandle_t mReceiveQueue;
+
   //································································································
   //    Error codes returned by begin
   //································································································

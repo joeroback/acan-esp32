@@ -19,7 +19,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class CANMessage {
+class alignas(32) CANMessage {
   public : uint32_t id = 0 ;  // Frame identifier
   public : union {
     uint64_t data64        ; // Caution: subject to endianness
